@@ -1,0 +1,4 @@
+server:
+  port: 9091
+
+spring.resources.static-locations: classpath:static/,file:static/

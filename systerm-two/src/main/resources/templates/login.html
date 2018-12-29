@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录页</title>
+    <script type="text/javascript" src="/js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.cookie.js"></script>
+</head>
+<style>
+    div{
+        text-align: center;
+    }
+</style>
+<body>
+<div >
+    <h1>B登录口!</h1>
+</div>
+<div>
+    <input id="loginName" name="loginName" type="text"><br/>
+    <input id="password" name="password" type="password"><br/>
+    <button onclick="submit()">提交</button>
+
+</div>
+
+<script>
+    var token = $.cookie("token");
+    console.log(token);
+    function submit(){
+        var loginName = $("#loginName").val();
+        var password= $("#password").val();
+        var data ={};
+        data.loginName = loginName;
+        data.password = password;
+        data.token = token;
+
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify(data),
+            url: "/toLogin",
+            dataType: "json",
+            contentType:"application/json",
+            success: function (result) {
+                if (result.head.status == 200) {
+                    var urls = result.data.urls;
+                    jQuery.each(urls, function () {  // this 指定值
+                        //循环访问
+                        $.ajax({
+                            url: this + "?token=" + result.data.token,
+                            type: "get",
+                            dataType: "jsonp" //指定服务器返回的数据类型
+                        });
+                    });
+                    window.location.href="/index";
+                    $.cookie('loginName', result.data.loginName);
+                    $.cookie("token", result.data.token);
+                }else {
+                    alert(result.head.message);
+                }
+            },
+            error: function () {
+
+            }
+        });
+
+    }
+</script>
+</body>
+</html>

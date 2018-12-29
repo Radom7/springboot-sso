@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    <script type="text/javascript" src="/js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.cookie.js"></script>
+</head>
+<style>
+    div{
+        text-align: center;
+    }
+</style>
+<body>
+<div >
+    <h1>欢迎<span id = "loginName"></span>登录B系统!</h1>
+    <button onclick="logout()">退出</button>
+</div>
+<script>
+    var token = $.cookie("token");
+    var loginName = $.cookie("loginName");
+
+    $("#loginName").html(loginName);
+    console.log(token);
+    if(token === undefined){
+        token = "";
+    }
+
+    $.ajax({
+        type: "GET",
+        url: "http://sso-server.com:9090/sso/checkToken",
+        beforeSend: function(request) {
+            request.setRequestHeader("token", token);
+        },
+        success: function (result) {
+            console.log(result);
+            if (result.head.status == 200) {
+                $.cookie('loginName', result.data.loginName);
+                $("#loginName").html(result.data.loginName);
+            }else {
+                alert(result.head.message);
+                window.location.href="/login";
+            }
+        },
+        error: function () {
+
+        }
+    });
+
+    function logout() {
+        $.ajax({
+            type: "GET",
+            url: "http://sso-server.com:9090/sso/logout",
+            beforeSend: function(request) {
+                request.setRequestHeader("token", token);
+            },
+            success: function (result) {
+                console.log(result);
+                if (result.head.status == 200) {
+                    var urls = result.data.urls;
+                    jQuery.each(urls, function () {  // this 指定值
+                        //循环访问
+                        $.ajax({
+                            url: this,
+                            type: "get",
+                            dataType: "jsonp" //指定服务器返回的数据类型
+                        });
+                    });
+                    window.location.href="/login";
+                }
+            },
+            error: function () {
+
+            }
+        });
+    }
+
+
+</script>
+</body>
+</html>
